@@ -61,14 +61,15 @@ for baselineCluster = 1:numClusters
             hold on;
             title(sprintf("Comparison between BL %s_Cluster%d and %s", ...
                 feature, baselineCluster, healthName), 'Interpreter','none');
-            Colors = parula(4);
+            Colors = spring(4);
             plot(BLDataMean(1), BLDataMean(2), 'Color', ...
-                    Colors(4,:), 'LineStyle','none', 'Marker','o');
+                    Colors(4,:), 'LineStyle','none', 'Marker','.','MarkerSize',50);
 
             for i = index-2:index
                 plot(healthDataMean{i}(1),healthDataMean{i}(2),'Color', ...
-                    Colors(mod(i, 3)+1,:), 'LineStyle','none', 'Marker','o');
+                    Colors(mod(i, 3)+1,:), 'LineStyle','none', 'Marker','.','MarkerSize',50);
             end
+            xlim([-20, 20]); ylim([-20, 20])
             legend('','Cluster1','Cluster2','Cluster3');
             hold off;
 
