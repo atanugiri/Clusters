@@ -63,11 +63,11 @@ for baselineCluster = 1:numClusters
                 feature, baselineCluster, healthName), 'Interpreter','none');
             Colors = parula(4);
             plot(BLDataMean(1), BLDataMean(2), 'Color', ...
-                    Colors(1,:), 'LineStyle','none', 'Marker','o');
+                    Colors(4,:), 'LineStyle','none', 'Marker','o');
 
             for i = index-2:index
                 plot(healthDataMean{i}(1),healthDataMean{i}(2),'Color', ...
-                    Colors(i+1,:), 'LineStyle','none', 'Marker','o');
+                    Colors(mod(i, 3)+1,:), 'LineStyle','none', 'Marker','o');
             end
             legend('','Cluster1','Cluster2','Cluster3');
             hold off;
