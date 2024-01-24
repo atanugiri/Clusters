@@ -52,15 +52,24 @@ for baselineCluster = 1:numClusters
         [hY, pY] = vartest2(BLdata(:,2), healthData(:,2));
 
         if isequal(mod(index, 3), 0)
-% 
-%             fprintf(pdfFile, 'Comparison between Baseline %s_1 and Health %s_1:\n', feature, feature);
+            healthFileName = featureFiles(index).name;
+            healthFileNameExp = '^(.*?)(?=\d)';
+            healthName = regexp(healthFileName, healthFileNameExp, 'match', 'once');
+ 
             % Save result
             h = figure;
             hold on;
-            plot(BLDataMean(1), BLDataMean(2), 'bo', 'LineStyle','none');
+            title(sprintf("Comparison between BL %s_Cluster%d and %s", ...
+                feature, baselineCluster, healthName), 'Interpreter','none');
+            Colors = parula(4);
+            plot(BLDataMean(1), BLDataMean(2), 'Color', ...
+                    Colors(1,:), 'LineStyle','none', 'Marker','o');
+
             for i = index-2:index
-                plot(healthDataMean{i}(1),healthDataMean{i}(2),'ro','LineStyle','none');
+                plot(healthDataMean{i}(1),healthDataMean{i}(2),'Color', ...
+                    Colors(i+1,:), 'LineStyle','none', 'Marker','o');
             end
+            legend('','Cluster1','Cluster2','Cluster3');
             hold off;
 
         end
