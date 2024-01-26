@@ -1,4 +1,4 @@
-function error_ellipse_fun(data, alpha)
+function error_ellipse_fun(data, alpha, plotColor)
 
 
 % Calculate the eigenvectors and eigenvalues
@@ -54,23 +54,16 @@ R = [ cos(phi) sin(phi); -sin(phi) cos(phi) ];
 r_ellipse = [ellipse_x_r;ellipse_y_r]' * R;
 
 % Draw the error ellipse
-plot(r_ellipse(:,1) + X0,r_ellipse(:,2) + Y0,'-')
+plot(r_ellipse(:,1) + X0,r_ellipse(:,2) + Y0,'-', 'Color', plotColor, 'LineWidth', 2, 'DisplayName','');
 hold on;
 
 % Plot the original data
-plot(data(:,1), data(:,2), '.');
-% mindata = min(min(data));
-% maxdata = max(max(data));
-% xlim([mindata-3, maxdata+3]);
-% ylim([mindata-3, maxdata+3]);
-hold on;
+% plot(data(:,1), data(:,2), '.','Color', plotColor, 'DisplayName','');
 
 % Plot the eigenvectors
-quiver(X0, Y0, largest_eigenvec(1)*sqrt(largest_eigenval), largest_eigenvec(2)*sqrt(largest_eigenval), '-m', 'LineWidth',2);
-quiver(X0, Y0, smallest_eigenvec(1)*sqrt(smallest_eigenval), smallest_eigenvec(2)*sqrt(smallest_eigenval), '-g', 'LineWidth',2);
-hold on;
+% quiver(X0, Y0, largest_eigenvec(1)*sqrt(largest_eigenval), largest_eigenvec(2)*sqrt(largest_eigenval), ...
+%     '-m', 'LineWidth',2, 'DisplayName','');
+% quiver(X0, Y0, smallest_eigenvec(1)*sqrt(smallest_eigenval), smallest_eigenvec(2)*sqrt(smallest_eigenval), ...
+%     '-g', 'LineWidth',2, 'DisplayName','');
 
-% % Set the axis labels
-% hXLabel = xlabel('x');
-% hYLabel = ylabel('y');
 end
