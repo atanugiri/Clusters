@@ -1,3 +1,6 @@
+% Author: Atanu Giri
+% Date: 01/25/2024
+
 function error_ellipse_fun(data, alpha, plotColor)
 
 
@@ -5,21 +8,18 @@ function error_ellipse_fun(data, alpha, plotColor)
 covariance = cov(data);
 [eigenvec, eigenval] = eig(covariance);
 
-% Get the index of the largest eigenvector
-[largest_eigenvec_ind_c, r] = find(eigenval == max(max(eigenval)));
-largest_eigenvec = eigenvec(:, largest_eigenvec_ind_c);
+% Find the index of the maximum eigenvalue
+[~, max_index] = max(diag(eigenval));
 
-% Get the largest eigenvalue
-largest_eigenval = max(max(eigenval));
+% Extract the largest eigenvector and eigenvalue
+largest_eigenvec = eigenvec(:, max_index);
+largest_eigenval = eigenval(max_index, max_index);
+
 
 % Get the smallest eigenvector and eigenvalue
-if(largest_eigenvec_ind_c == 1)
-    smallest_eigenval = max(eigenval(:,2));
-    smallest_eigenvec = eigenvec(:,2);
-else
-    smallest_eigenval = max(eigenval(:,1));
-    smallest_eigenvec = eigenvec(1,:);
-end
+[~, min_index] = min(diag(eigenval));
+smallest_eigenvec = eigenvec(:, min_index);
+smallest_eigenval = eigenval(min_index, min_index);
 
 % Calculate the angle between the x-axis and the largest eigenvector
 angle = atan2(largest_eigenvec(2), largest_eigenvec(1));
@@ -44,26 +44,27 @@ a = sqrt(chiSqVal*largest_eigenval);
 b = sqrt(chiSqVal*smallest_eigenval);
 
 % the ellipse in x and y coordinates
-ellipse_x_r = a*cos( theta_grid );
-ellipse_y_r = b*sin( theta_grid );
+ellipse_x_r = a*cos(theta_grid);
+ellipse_y_r = b*sin(theta_grid);
 
 %Define a rotation matrix
-R = [ cos(phi) sin(phi); -sin(phi) cos(phi) ];
+R = [cos(phi) sin(phi); -sin(phi) cos(phi)];
 
 %let's rotate the ellipse to some angle phi
-r_ellipse = [ellipse_x_r;ellipse_y_r]' * R;
+r_ellipse = [ellipse_x_r; ellipse_y_r]' * R;
 
 % Draw the error ellipse
-plot(r_ellipse(:,1) + X0,r_ellipse(:,2) + Y0,'-', 'Color', plotColor, 'LineWidth', 2, 'DisplayName','');
+plot(X0, Y0, '.', 'Color', plotColor, 'MarkerSize', 20, 'DisplayName', '');
 hold on;
+plot(r_ellipse(:,1) + X0,r_ellipse(:,2) + Y0,'-','Color',plotColor,'LineWidth',2,'DisplayName','');
 
 % Plot the original data
 % plot(data(:,1), data(:,2), '.','Color', plotColor, 'DisplayName','');
 
 % Plot the eigenvectors
 % quiver(X0, Y0, largest_eigenvec(1)*sqrt(largest_eigenval), largest_eigenvec(2)*sqrt(largest_eigenval), ...
-%     '-m', 'LineWidth',2, 'DisplayName','');
+%     '-r', 'LineWidth',2, 'DisplayName','');
 % quiver(X0, Y0, smallest_eigenvec(1)*sqrt(smallest_eigenval), smallest_eigenvec(2)*sqrt(smallest_eigenval), ...
-%     '-g', 'LineWidth',2, 'DisplayName','');
+%     '-b', 'LineWidth',2, 'DisplayName','');
 
 end
