@@ -18,5 +18,6 @@ y = y0 + b*sin(t);
 
 plot(x,y,'-','Color',plotColor,'LineWidth',2);
 hold on;
-plot(x0, y0, '.', 'Color', plotColor, 'MarkerSize', 20);
+plot(x0, y0, '.', 'Color', 'k', 'MarkerSize', 20);
+plot(data(:,1),data(:,2),'.','Color',plotColor);
 end

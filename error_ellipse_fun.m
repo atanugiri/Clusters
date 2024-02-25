@@ -2,7 +2,7 @@
 % Date: 01/25/2024
 
 function error_ellipse_fun(data, alpha, plotColor)
-
+try
 
 % Calculate the eigenvectors and eigenvalues
 covariance = cov(data);
@@ -54,8 +54,9 @@ R = [cos(phi) sin(phi); -sin(phi) cos(phi)];
 r_ellipse = [ellipse_x_r; ellipse_y_r]' * R;
 
 % Draw the error ellipse
-plot(X0, Y0, '.', 'Color', plotColor, 'MarkerSize', 20, 'DisplayName', '');
+plot(X0, Y0, '.', 'Color', 'k', 'MarkerSize', 20, 'DisplayName', '');
 hold on;
+plot(data(:,1),data(:,2),'.', 'MarkerSize',10, 'Color',plotColor);
 plot(r_ellipse(:,1) + X0,r_ellipse(:,2) + Y0,'-','Color',plotColor,'LineWidth',2,'DisplayName','');
 
 % Plot the original data
@@ -67,4 +68,7 @@ plot(r_ellipse(:,1) + X0,r_ellipse(:,2) + Y0,'-','Color',plotColor,'LineWidth',2
 % quiver(X0, Y0, smallest_eigenvec(1)*sqrt(smallest_eigenval), smallest_eigenvec(2)*sqrt(smallest_eigenval), ...
 %     '-b', 'LineWidth',2, 'DisplayName','');
 
+catch
+    disp("Some problem");
+end
 end
