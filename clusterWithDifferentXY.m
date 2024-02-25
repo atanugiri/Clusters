@@ -2,8 +2,8 @@
 % Date: 01/30/2024
 
 function clusterWithDifferentXY(filename1, filename2)
-% filename1 = 'Baseline SP_1.xlsx';
-% filename2 = 'Baseline ET_1.xlsx';
+% filename1 = 'Baseline ET_1.xlsx';
+% filename2 = 'Baseline RP1_1.xlsx';
 
 % Use regular expression to extract the desired part
 expression = '([A-Za-z]+)\d*';
@@ -161,6 +161,7 @@ end
 
 % percentage of data in each clusters in BL
 totalData = sum(cellfun(@(x) size(x, 1), BLdata));
+blClusterPopul = cellfun(@(x) size(x,1), BLdata);
 percentInBLcluster = cellfun(@(x) (size(x, 1)/totalData)*100, BLdata);
 
 for i = 1:numel(healthData)
@@ -169,6 +170,7 @@ end
 
 % percentage of data in each clusters in health manipulation
 totalDataMan = zeros(1,length(healthData)/numClusters);
+trtClusterPopul = cellfun(@(x) size(x,1), healthData);
 percentInManCluster = cell(1,length(healthData)/numClusters);
 
 % percentage of data in each clusters in health manipulation
@@ -185,27 +187,19 @@ for index = 1:length(healthData)
     if isequal(mod(index, 3), 0)
         figure;
         hold on;
-
+        set(gcf, 'Windowstyle', 'docked');
         % Plot BL Clusters
-        Colors = lines(6);
+        Colors = ["#77AC30", "magenta"];
         for i = 1:3
-            randomEllipseFun(BLdata{i}, Colors(i,:));
-%             error_ellipse_fun(BLtable{i}, 0.68, Colors(i,:));
+%             randomEllipseFun(BLdata{i}, Colors(1));
+            error_ellipse_fun(BLdata{i}, 0.68, Colors(1));
         end
 
         % Plot health manipulation Clusters
         for i = index-2:index
-            randomEllipseFun(healthData{i}, Colors(mod(i-1,3)+4,:));
-%             error_ellipse_fun(healthTable{i}, 0.68, Colors(mod(i-1,3)+4,:));
+%             randomEllipseFun(healthData{i}, Colors(2));
+            error_ellipse_fun(healthData{i}, 0.68, Colors(2));
         end
-
-        % Set limit
-        xlim([-20, 20]);
-        ylim([-20, 20]);
-
-        % Add legend
-%         lgd = legend;
-%         lgd.Location = 'best';
 
         % Set Axis name
         xStr = split(healthName1{index}, ' ');
@@ -216,22 +210,39 @@ for index = 1:length(healthData)
         title(sprintf("Comparison between BL Cluster and %s Clustes", xStr{1}), 'Interpreter','none');
 
 
-        % Statistics
+        %% Mean shift Statistics
         pVal = cell(1,numClusters);
-        textPosition = [-10, 18; 0, 18; 10, 18];
         for i = 1:length(pVal)
             [h, pVal{i}, ci, stats] = ttest2(BLdata{i}, healthData{index-3+i});
-            text(textPosition(i,1), textPosition(i,2), ["p = ", num2str(pVal{i})]);
+            text(min(xlim), (1 - 0.1*i)*max(ylim), sprintf("Cluster %d: " + ...
+                "p(x) = %0.4f, p(y) = %0.4f", i, pVal{i}(1),  pVal{i}(2)));
         end
 
-        % Print percentage
-        textPositionPercent = [-10, 8; 0, 8; 10, 8];
+        %% Print percentage
         for i = 1:length(pVal)
-            text(textPositionPercent(i,1), textPositionPercent(i,2), ...
-                ["BL: ", percentInBLcluster(i), "Man: ", percentInManCluster{index/3}(i)]);
+            text(mean(xlim), (1 - 0.1*i)*max(ylim), ...
+                sprintf("Cluster %d: BL %.0f, Man %0.f", i, percentInBLcluster(i), ...
+                percentInManCluster{index/3}(i)));
         end
 
-        hold off;
-    end
+        %% chi-square test
+        popDiffStat = zeros(1,numClusters);
+        currentTrtClusterPop = trtClusterPopul(index-2:index);
+
+        for i = 1:numClusters
+            currentBlPop = blClusterPopul(i);
+            currentTrtPop = trtClusterPopul(i);
+            [popDiffStat(i), Q]= chi2test([currentBlPop, sum(blClusterPopul) - currentBlPop; ...
+                currentTrtPop, sum(currentTrtClusterPop) - currentTrtPop]);
+            text(max(xlim), (1 - 0.1*i)*max(ylim), ...
+                sprintf("Cluster %d Pop: %.4f", i, popDiffStat(i)));
+        end
+
+%         N = [blClusterPopul; currentTrtClusterPop];
+%         [significance, colsNotMrgd, finalCols, colsMrgdA, colsMrgdB] = dg_chi2test3(N, 1);
+%         text((1-0.3)*max(xlim), (1 - 0.1*i)*max(ylim), ...
+%                 sprintf("Pop. Sig. : %.4f", significance));
+    
+    end % figure 1
 end
 end
