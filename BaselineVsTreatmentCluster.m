@@ -3,7 +3,7 @@
 
 function BaselineVsTreatmentCluster(baseline, treatment)
 % baseline = 'Baseline';
-% treatment = 'Boost_and_Etho';
+% treatment = 'Oxy';
 
 folderPath = ['/Users/atanugiri/Downloads/Clusters/' ...
     'Baseline_Oxy_FoodDep_BoostAndEtho_Ghrelin_Saline_Cluster_Tables'];
@@ -32,26 +32,24 @@ for feature = 1:length(blClusters)
 
     for clusterId = 1:numClusters
         blFilePath = fullfile(folderPath, blClusters{feature}(clusterId));
-        % Define the regular expression pattern for legend
-%         pattern = '(\w+) DT_\d+\.xlsx';
-%         blMatch = regexp(blClusters{feature}(clusterId), pattern, 'tokens', 'once');
-%         blLegend{clusterId} = sprintf('%s C%d', blMatch{1}{1}, clusterId);
-
         blTable = readtable(blFilePath{1});
         blData = [blTable.clusterX, blTable.clusterY];
+
+        if isequal(clusterId, 1)
+            jitter_amount = 1; % User adjustable
+            blData(:,2) = blData(:,2) + jitter_amount * randn(size(blData(:,2)));
+        end
 %         randomEllipseFun(blData, Colors(clusterId,:));
         error_ellipse_fun(blData, 0.68, Colors(1));
         blClusterPopul(clusterId) = size(blData, 1);
 
-
         trtFilePath = fullfile(folderPath, treatmentClusters{feature}(clusterId));
-        % Define the regular expression pattern for legend
-%         pattern = '(\w+) DT_\d+\.xlsx';
-%         trtMatch = regexp(treatmentClusters{feature}(clusterId), pattern, 'tokens', 'once');
-%         trtLegend{clusterId} = sprintf('%s C%d', trtMatch{1}{1}, clusterId);
-
         trtTable = readtable(trtFilePath{1});
         trtData = [trtTable.clusterX, trtTable.clusterY];
+        if isequal(clusterId, 1)
+            jitter_amount = 1; % User adjustable
+            trtData(:,2) = trtData(:,2) + jitter_amount * randn(size(trtData(:,2)));
+        end
 %         randomEllipseFun(trtData, Colors(numClusters+clusterId,:));
         error_ellipse_fun(trtData, 0.68, Colors(2));
         trtClusterPopul(clusterId) = size(trtData, 1);
