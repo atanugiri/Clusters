@@ -1,9 +1,14 @@
 % Author: Atanu Giri
 % Date: 02/07/2024
 
+% This function takes the cluster parameters as input file plots control vs
+% treatment clusters. It also calculates the percentage population in
+% clusters and runs ststistics
+
 function BaselineVsTreatmentCluster(baseline, treatment)
-% baseline = 'Baseline';
-% treatment = 'Oxy';
+
+% Example usage
+% BaselineVsTreatmentCluster('Baseline', 'Food_Deprivation')
 
 folderPath = ['/Users/atanugiri/Downloads/Clusters/' ...
     'Baseline_Oxy_FoodDep_BoostAndEtho_Ghrelin_Saline_Cluster_Tables'];
@@ -19,16 +24,11 @@ for feature = 1:length(blClusters)
     numClusters = length(blClusters{feature});
     figure(feature);
     set(gcf, 'Windowstyle', 'docked');
-%     hold on;
-%     Colors = lines(2*numClusters);
     Colors = ["#77AC30", "magenta"];
 
     % Population
     blClusterPopul = zeros(1, numClusters);
     trtClusterPopul = zeros(1, numClusters);
-
-%     blLegend = {};
-%     trtLegend = {};
 
     for clusterId = 1:numClusters
         blFilePath = fullfile(folderPath, blClusters{feature}(clusterId));
@@ -39,18 +39,20 @@ for feature = 1:length(blClusters)
             jitter_amount = 1; % User adjustable
             blData(:,2) = blData(:,2) + jitter_amount * randn(size(blData(:,2)));
         end
-%         randomEllipseFun(blData, Colors(clusterId,:));
+
         error_ellipse_fun(blData, 0.68, Colors(1));
         blClusterPopul(clusterId) = size(blData, 1);
 
         trtFilePath = fullfile(folderPath, treatmentClusters{feature}(clusterId));
         trtTable = readtable(trtFilePath{1});
         trtData = [trtTable.clusterX, trtTable.clusterY];
+
+        % Because cluster 1 is 1-D data, not visible
         if isequal(clusterId, 1)
             jitter_amount = 1; % User adjustable
             trtData(:,2) = trtData(:,2) + jitter_amount * randn(size(trtData(:,2)));
         end
-%         randomEllipseFun(trtData, Colors(numClusters+clusterId,:));
+
         error_ellipse_fun(trtData, 0.68, Colors(2));
         trtClusterPopul(clusterId) = size(trtData, 1);
 
@@ -68,7 +70,7 @@ for feature = 1:length(blClusters)
     % Relative population
     pctBlData = arrayfun(@(x) (100*x/sum(blClusterPopul)), blClusterPopul);
     pctTrtData = arrayfun(@(x) (100*x/sum(trtClusterPopul)), trtClusterPopul);
-    
+
     %% chi-square test
     popDiffStat = zeros(1,numClusters);
 
@@ -79,7 +81,7 @@ for feature = 1:length(blClusters)
             currentTrtPop, sum(trtClusterPopul) - currentTrtPop]);
     end
 
-    % Plot the percentages on the figure
+    % Print the Chi-squared result on figure
     xlimVals = xlim;
     ylimVals = ylim;
     xDist = (xlimVals(2) - xlimVals(1)) / numClusters; % Equal division along x-axis
@@ -87,20 +89,29 @@ for feature = 1:length(blClusters)
     for clusterId = 1:numClusters
         xPos = xlimVals(1) + (clusterId - 0.5) * xDist; % Centered position for each cluster
         yPosBl = 0.8*ylimVals(2);
-        yPosTrt = 0.7*ylimVals(2);
 
-        % Percentage population
-        text(xPos, yPosBl, sprintf('%.0f%%', pctBlData(clusterId)), ...
-            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
-        text(xPos, yPosTrt, sprintf('%.0f%%', pctTrtData(clusterId)), ...
+        text(xPos, yPosBl, sprintf('popul. p = %.4f', popDiffStat(clusterId)), ...
             'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Color', 'red');
-
-        % Statistics on population
-        text(xPos, 0.5*ylimVals(2), sprintf('popul. p = %.4f', popDiffStat(clusterId)), ...
-            'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
     end
 
     hold off;
+
+    % Plot bar plot
+    figure(length(blClusters) + feature);
+    set(gcf, 'Windowstyle', 'docked');
+    barData = [pctBlData(end:-1:1); pctTrtData(end:-1:1)];
+    bar(barData, 'stacked');
+    xt = get(gca, 'XTick');
+    set(gca, 'XTick', xt, 'XTickLabel', {'Control' 'Treatment'});
+    barbase = cumsum([zeros(size(barData,1),1) barData(:,1:end-1)],2);
+    joblblpos = barData/2 + barbase;
+    for k1 = 1:size(barData,1)
+        text(xt(k1)*ones(1,size(barData,2)), joblblpos(k1,:), ...
+            arrayfun(@(x) sprintf('%.2f', x), barData(k1,:), 'UniformOutput', false), ...
+            'HorizontalAlignment','center');
+    end
+    title(sprintf("%s", match{1}{1}), 'FontSize', 30, 'Interpreter','none');
+    ylabel('% population', 'Interpreter','latex');
 end
 
 %% Description of treatmentClustersFun
